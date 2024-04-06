@@ -2,52 +2,52 @@ import React, { useState } from "react";
 import { Button, Text } from "react-native";
 import { useMutation } from "@tanstack/react-query";
 import * as Speech from "expo-speech";
+import { supabase } from "../supabase/supabaseClient";
 
-interface ChatResponse {
-  choices: [
+async function fetchChatGPTResponse(promptText: string) {
+  console.log(
+    "Sending the following prompt to ChatGPT via Supabase Edge Function:",
+    promptText
+  );
+
+  // Assuming you're authenticated and the Edge Function automatically handles Authorization
+  const { data, error } = await supabase.functions.invoke(
+    "fetchChatGPTResponse",
     {
-      message: {
-        content: string;
-      };
+      body: JSON.stringify({ prompt: promptText }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     }
-  ];
-}
+  );
 
-async function fetchChatGPTResponse(promptText: string): Promise<ChatResponse> {
-  console.log("Sending the following prompt to ChatGPT: ", promptText);
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${""}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: promptText }],
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
+  if (error) {
+    console.error("Error invoking Supabase Function:", error);
+    throw new Error("Failed to fetch data from Supabase Function");
   }
 
-  return response.json();
+  return data;
 }
 
 export default function ChatGPTQueryComponent() {
   const [textResponse, setTextResponse] = useState("");
 
-  const { mutate: fetchResponse } = useMutation({
-    mutationFn: fetchChatGPTResponse,
-    onSuccess: (data: ChatResponse) => {
-      const reply = data.choices[0].message.content;
+  const { mutate: fetchResponse } = useMutation(fetchChatGPTResponse, {
+    onSuccess: (data: { text: string }) => {
+      // Parse the response according to your Edge Function's response structure
+      // This example assumes a simple structure. Adjust based on your actual response.
+      const reply = data?.text || "No response"; // Adjust 'text' based on your Edge Function's response
       setTextResponse(reply);
       Speech.speak(reply, { language: "zh-CN" });
+    },
+    onError: (error: any) => {
+      console.error("Mutation error:", error);
+      setTextResponse("An error occurred while fetching the response.");
     },
   });
 
   const handlePress = () => {
-    fetchResponse("Help me learn Chinese please!");
+    fetchResponse();
   };
 
   return (

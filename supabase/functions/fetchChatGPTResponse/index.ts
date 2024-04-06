@@ -1,31 +1,54 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
+import { serve } from "https://deno.land/std/http/server.ts";
+import { json } from "https://deno.land/x/sift/mod.ts";
 
-console.log("Hello from Functions!")
-console.log(Deno.env.get('OPENAI_KEY'))
+console.log("Serving request from the edge!");
 
-Deno.serve(async (req) => {
-
-  const { name } = await req.json()
-  const data = {
-    message: `Hello ${name}!`,
+async function handler(req: Request): Promise<Response> {
+  if (req.method !== "POST") {
+    return new Response("Method Not Allowed", { status: 405 });
   }
 
-  return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
-  )
-})
+  try {
+    const openAIKey = Deno.env.get("OPENAI_KEY");
+    if (!openAIKey) {
+      throw new Error("OpenAI API key is not defined in the environment variables.");
+    }
 
-/* To invoke locally:
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${openAIKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo-instruct",
+        messages: [
+          {
+            role: "user",
+            content: "Say hi to me in Chinese!",
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 150,
+        top_p: 1,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0,
+      }),
+    });
 
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
+    if (!response.ok) {
+      // It's a good practice to handle non-2xx responses as well
+      console.log(response)
+      throw new Error(`Failed to fetch from OpenAI: ${response.statusText}`);
+    }
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/fetchChatGPTResponse' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
-    --data '{"name":"Functions"}'
+    const data = await response.json();
+    return json(data); // Using Sift's `json` helper for convenience
+  } catch (error) {
+    console.error("Error:", error);
+    return new Response("Internal Server Error", { status: 500 });
+  }
+}
 
-*/
+// Start the server
+serve(handler);
