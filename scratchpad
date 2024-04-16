@@ -1,0 +1,4 @@
+curl --request POST 'https://icdhvqybacezibggzlyx.supabase.co/functions/v1/fetchChatGPTResponse \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljZGh2cXliYWNlemliZ2d6bHl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIxNjI1NjIsImV4cCI6MjAyNzczODU2Mn0.E6jVA7HsQkHFuYUsDL9hKNtoxRgd2RFaY5KWIRSjdbg' \
+--header 'Content-Type: application/json' \        
+--data '{ "prompt":"Say hi to me in Chinese!" }' 
