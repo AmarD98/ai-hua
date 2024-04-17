@@ -36,15 +36,5 @@ export default function AppLayout() {
     };
   }, []);
 
-  return (
-    <Stack>
-      {user ? (
-        // If the user is logged in, render the tabs
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      ) : (
-        // If not logged in, show the authentication screen
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      )}
-    </Stack>
-  );
+  return <Stack></Stack>;
 }
