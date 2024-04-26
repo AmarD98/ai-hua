@@ -22,9 +22,7 @@ export default function AuthScreen() {
   // Configure the Google Signin module with the determined client ID
   GoogleSignin.configure({
     scopes: ["email"], // Adjust the scopes according to your need; 'email' is typically required
-    webClientId:
-      "963568773459-8bvhf5guu6lok2dqvguo1629pmelgp9d.apps.googleusercontent.com", // Use the platform-specific client ID
-
+    webClientId: clientId, // Use the platform-specific client ID
     offlineAccess: true, // If you need to access Google API when the user is offline
   });
 

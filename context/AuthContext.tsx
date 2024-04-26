@@ -1,104 +1,54 @@
-import React, { useState, useEffect } from "react";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { supabase } from "../supabase/supabaseClient"; // Adjust the path as necessary
-import { useStorageState } from "./useStorageState";
+import React, {
+  useState,
+  useEffect,
+  createContext,
+  PropsWithChildren,
+} from "react";
+import { Session, User } from "@supabase/supabase-js";
+import { supabase } from "../supabase/supabaseClient";
 
-const AuthContext = React.createContext<{
-  signIn: () => void;
-  signOut: () => void;
-  session?: string | null;
-  isLoading: boolean;
-}>({
-  signIn: () => null,
-  signOut: () => null,
-  session: null,
-  isLoading: false,
-});
+type AuthProps = {
+  user: User | null;
+  session: Session | null;
+  initialized?: boolean;
+  signOut?: () => void;
+};
 
-// Configure Google Signin
-GoogleSignin.configure({
-  scopes: ["email"], // Adjust scopes according to your needs
-  webClientId: "YOUR_WEB_CLIENT_ID", // Use the appropriate client ID for the platform
-  offlineAccess: true,
-});
+export const AuthContext = createContext<Partial<AuthProps>>({});
 
-export function useSession() {
-  const context = React.useContext(AuthContext);
-  if (process.env.NODE_ENV !== "production") {
-    if (!context) {
-      throw new Error("useSession must be wrapped in a <SessionProvider />");
-    }
-  }
-  return context;
+// Custom hook to read the context values
+export function useAuth() {
+  return React.useContext(AuthContext);
 }
 
-export function SessionProvider(props: React.PropsWithChildren) {
-  const [[isLoading, session], setSession] = useStorageState("session");
+export const AuthProvider = ({ children }: PropsWithChildren) => {
+  const [user, setUser] = useState<User | null>();
+  const [session, setSession] = useState<Session | null>(null);
+  const [initialized, setInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    // Check session on mount
-    checkSession();
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session) {
-          setSession(session);
-        } else {
-          setSession(null);
-        }
-      }
-    );
-
+    // Listen for changes to authentication state
+    const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setSession(session);
+      setUser(session ? session.user : null);
+      setInitialized(true);
+    });
     return () => {
-      listener.unsubscribe();
+      data.subscription.unsubscribe();
     };
   }, []);
 
-  const checkSession = async () => {
-    const currentSession = supabase.auth.session();
-    setSession(currentSession);
-    setLoading(false);
-  };
-
-  const signIn = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      if (userInfo.idToken) {
-        const { data: supabaseSession, error } =
-          await supabase.auth.signInWithIdToken({
-            provider: "google",
-            token: userInfo.idToken,
-          });
-        if (error) throw error;
-        setSession(supabaseSession);
-      }
-    } catch (error) {
-      console.error("SignIn error:", error);
-    }
-  };
-
+  // Log out the user
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      await GoogleSignin.signOut();
-      setSession(null);
-    } catch (error) {
-      console.error("SignOut error:", error);
-    }
+    await supabase.auth.signOut();
   };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        signIn,
-        signOut,
-        session,
-        isLoading,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-}
+  const value = {
+    user,
+    session,
+    initialized,
+    signOut,
+  };
 
-export default AuthContext;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

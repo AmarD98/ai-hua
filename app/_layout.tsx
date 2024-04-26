@@ -1,40 +1,38 @@
-import React, { useEffect, useState } from "react";
-import { Stack } from "expo-router/stack";
-import { supabase } from "../supabase/supabaseClient";
-import { Session } from "@supabase/supabase-js";
+import { Slot, useRouter, useSegments } from "expo-router";
+import { useEffect } from "react";
+import { AuthProvider, useAuth } from "../context/AuthContext";
 
-export default function AppLayout() {
-  // Initialize user as null for clarity and controlled behavior
-  const [user, setUser] = useState<Session["user"] | undefined>();
+// Makes sure the user is authenticated before accessing protected pages
+const InitialLayout = () => {
+  const { session, initialized } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
-    // Define an async function to fetch the current user
-    const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Error getting current session:", error);
-        return;
-      }
-      console.log(data);
-      console.log("Session: ", data.session?.user);
-      setUser(data.session?.user);
-    };
+    if (!initialized) return;
 
-    // Call the fetchUser function
-    fetchUser();
+    // Check if the path/url is in the (auth) group
+    const inAuthGroup = segments[0] === "(auth)";
 
-    // Set up the auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user);
-      }
-    );
+    if (session && !inAuthGroup) {
+      // Redirect authenticated users to the list page
+      router.replace("/app");
+    } else if (!session) {
+      // Redirect unauthenticated users to the login page
+      router.replace("/");
+    }
+  }, [session, initialized]);
 
-    // Clean up the listener when the component unmounts
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+  return <Slot />;
+};
 
-  return <Stack></Stack>;
-}
+// Wrap the app with the AuthProvider
+const RootLayout = () => {
+  return (
+    <AuthProvider>
+      <InitialLayout />
+    </AuthProvider>
+  );
+};
+
+export default RootLayout;
