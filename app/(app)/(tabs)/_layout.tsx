@@ -1,13 +1,18 @@
 import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
+import { useSupabase } from "../../../context/useSupabase";
 
 export default function TabLayout() {
+  const { isLoggedIn } = useSupabase();
+  if (!isLoggedIn) {
+    return <Redirect href="/sign-in" />;
+  }
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: "blue" }}>
       <Tabs.Screen
-        name="index"
+        name="speaking"
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (

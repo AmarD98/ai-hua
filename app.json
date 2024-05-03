@@ -5,8 +5,8 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "scheme": "ai-hua-scheme",
+    "userInterfaceStyle": "dark",
+    "scheme": "com.addevelopments.aihua",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",

@@ -27,7 +27,7 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="ai-hua-scheme"/>
+        <data android:scheme="com.addevelopments.aihua"/>
         <data android:scheme="com.addevelopments.aihua"/>
         <data android:scheme="exp+ai-hua"/>
       </intent-filter>
