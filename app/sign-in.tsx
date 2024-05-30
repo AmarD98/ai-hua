@@ -5,7 +5,6 @@ import {
   GoogleSigninButton,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
-import { supabase } from "../supabase/supabaseClient";
 import * as WebBrowser from "expo-web-browser";
 import * as SecureStore from "expo-secure-store";
 import { useSupabase } from "../context/useSupabase";

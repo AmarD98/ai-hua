@@ -1,5 +1,6 @@
 import { View, Text, SafeAreaView } from "react-native";
 import { useSupabase } from "../../context/useSupabase";
+import { Stack } from "expo-router";
 
 export default function Index() {
   const { logout } = useSupabase();
@@ -7,14 +8,9 @@ export default function Index() {
     <SafeAreaView
       style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
     >
-      <Text
-        onPress={() => {
-          console.log("Sign out button pressed!");
-          logout();
-        }}
-      >
-        You're in!
-      </Text>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
     </SafeAreaView>
   );
 }

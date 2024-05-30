@@ -2,7 +2,6 @@ import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import * as Progress from "react-native-progress";
 import { router } from "expo-router";
-import { supabase } from "../../../supabase/supabaseClient";
 
 export default function Tab() {
   // Placeholder function for onPress event

@@ -83,17 +83,25 @@ export const SupabaseProvider = (props: SupabaseProviderProps) => {
     try {
       await GoogleSignin.hasPlayServices();
       GoogleSignin.configure({
+        scopes: ["https://www.googleapis.com/auth/drive"],
         webClientId:
           "963568773459-8bvhf5guu6lok2dqvguo1629pmelgp9d.apps.googleusercontent.com",
+        androidClientId: "",
+        offlineAccess: true,
+        forceCodeForRefreshToken: true,
+        profileImageSize: 120,
       });
 
       const userInfo = await GoogleSignin.signIn();
+      console.log("Sign in complete");
       if (userInfo.idToken) {
+        console.log("ID Token found, sending to supabase");
         const { data, error } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: userInfo.idToken,
         });
         setLoggedIn(true);
+        router.replace("/app");
         console.log(error, data);
       } else {
         throw new Error("No id token!");
