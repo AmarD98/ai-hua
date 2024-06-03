@@ -1,13 +1,12 @@
 import { Slot, useRouter, useSegments } from "expo-router";
 import { useEffect, useState } from "react";
-import { SupabaseProvider } from "../context/SupabaseProvider";
-import { useSupabase } from "../context/useSupabase";
+import { supabase } from "../supabase/supabaseClient";
 
-const InitialLayout = () => {
-  const { isLoggedIn } = useSupabase();
+const InitialLayout = async () => {
   const segments = useSegments();
   const router = useRouter();
   const [initialized, setInitialized] = useState(false); // Define how this should be set
+  const { data } = await supabase.auth.getUser();
 
   useEffect(() => {
     // Initialization logic here, set 'initialized' appropriately
@@ -17,24 +16,20 @@ const InitialLayout = () => {
 
     const inAuthGroup = segments[0] === "(auth)";
 
-    if (isLoggedIn) {
+    if (true) {
       console.log("Logged in, redirecting to /app...");
       router.replace("/app");
     } else {
       console.log("Not logged in redirecting back to /");
       router.replace("/");
     }
-  }, [isLoggedIn, initialized, segments]);
+  }, [initialized, segments]);
 
   return <Slot />;
 };
 
 const RootLayout = () => {
-  return (
-    <SupabaseProvider>
-      <Slot />
-    </SupabaseProvider>
-  );
+  return <Slot />;
 };
 
 export default RootLayout;
