@@ -1,20 +1,12 @@
 import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Redirect, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 
 export default function TabLayout() {
+  console.log("Tab layout rendered");
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: "blue" }}>
-      <Tabs.Screen
-        name="speaking"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="home" color={color} />
-          ),
-        }}
-      />
       <Tabs.Screen
         name="speaking"
         options={{
@@ -22,6 +14,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="spatial-audio-off" size={24} color={color} />
           ),
+          href: "/speaking",
         }}
       />
       <Tabs.Screen
@@ -31,12 +24,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <FontAwesome name="language" size={24} color={color} />
           ),
+          href: "/vocabulary",
         }}
       />
       <Tabs.Screen
         name="listening"
         options={{
-          title: "Listen",
+          title: "Listening",
           tabBarIcon: ({ color }) => (
             <FontAwesome
               name="assistive-listening-systems"
@@ -44,6 +38,7 @@ export default function TabLayout() {
               color={color}
             />
           ),
+          href: "/listening",
         }}
       />
       <Tabs.Screen
@@ -53,6 +48,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <FontAwesome name="cogs" size={24} color={color} />
           ),
+          href: "/settings",
         }}
       />
     </Tabs>
